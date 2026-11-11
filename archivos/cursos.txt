@@ -1,0 +1,4 @@
+#CURSO	PROFESOR	GRUPO
+Calculo	Prof_A	50
+Algebra	Prof_B	51
+Fisica	Prof_A	50

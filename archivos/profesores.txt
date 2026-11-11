@@ -1,0 +1,3 @@
+#PROFESOR	NO_DISPONIBLE
+Prof_A	Lunes 07-09;Martes 09-11
+Prof_B 
