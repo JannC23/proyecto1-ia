@@ -1,6 +1,5 @@
 import time 
-import itertools
-import time
+
 
 class costo:
     """Busqueda por costo uniforme, va expandiendo el nodo con 
@@ -12,6 +11,10 @@ class costo:
         self.nodos_explorados = 0
         self.tiempo = 0.0
 
+    def _prioridad(self,nodo):
+        fila, col = nodo.estado 
+        return (nodo.costo, fila, col)
+
     def resolver(self):
         """Devuelve el Nodo meta, o None si no hay solución.
         Deja nodos_explorados y tiempo (segundos) como atributos."""
@@ -20,17 +23,15 @@ class costo:
         self.nodos_explorados = 0
         solucion = None
 
-        
-        contador = itertools.count()  # desempate para heapq
         raiz = self.problema.estado_inicial()
-        abierta = [(raiz.costo, next(contador), raiz)]
+        abierta = [(raiz.costo, next(contador), raiz)] #Un solo nodo por estado
         mejor_g = {raiz.estado: raiz.costo}
-        cerrada = set()
+
 
         while abierta:
-            _, _, nodo = heapq.heappop(abierta)
-            if nodo.estado in cerrada:
-                continue  # entrada obsoleta (lazy deletion)
+            nodo = min(abierta.values(), key=self._prioridad)  #Saca el nodo minimo
+            del abierta[nodo.estado]  
+
             if self.problema.es_meta(nodo):
                 solucion = nodo
                 break
@@ -41,7 +42,7 @@ class costo:
             for hijo in hijos:
                 if hijo.costo < mejor_g.get(hijo.estado, float("inf")):
                     mejor_g[hijo.estado] = hijo.costo
-                    heapq.heappush(abierta, (hijo.costo, next(contador), hijo))
+                    abierta[hijo.estado] = hijo  #Remplazamos si ya tenia mayor costo
 
         self.tiempo = time.perf_counter() - inicio
         return solucion
