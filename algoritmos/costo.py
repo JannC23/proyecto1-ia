@@ -11,7 +11,7 @@ class costo:
         self.nodos_explorados = 0
         self.tiempo = 0.0
 
-    def _prioridad(self,nodo):
+    def _prioridad(self,nodo):  #Para poder desempatar
         fila, col = nodo.estado 
         return (nodo.costo, fila, col)
 
@@ -24,7 +24,7 @@ class costo:
         solucion = None
 
         raiz = self.problema.estado_inicial()
-        abierta = [(raiz.costo, next(contador), raiz)] #Un solo nodo por estado
+        abierta = {raiz.estado: raiz}  #Un solo nodo por estado
         mejor_g = {raiz.estado: raiz.costo}
 
 
@@ -32,13 +32,13 @@ class costo:
             nodo = min(abierta.values(), key=self._prioridad)  #Saca el nodo minimo
             del abierta[nodo.estado]  
 
-            if self.problema.es_meta(nodo):
+            if self.problema.es_meta(nodo): #si es meta, guarda esta slucion y rompe el while
                 solucion = nodo
                 break
-            cerrada.add(nodo.estado)
+            
 
-            hijos = self.problema.sucesores(nodo)
-            self.nodos_explorados += len(hijos)
+            hijos = self.problema.sucesores(nodo)   #Hijos del nodo actual
+            self.nodos_explorados += len(hijos)  #Expande los hijos y aumenta el contador de nodos explorados
             for hijo in hijos:
                 if hijo.costo < mejor_g.get(hijo.estado, float("inf")):
                     mejor_g[hijo.estado] = hijo.costo

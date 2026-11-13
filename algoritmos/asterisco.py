@@ -7,14 +7,23 @@ class aste:
     f(n) tiene. Formula que aplica A* f(n) = g(n) + h(n)
 """
 
-     def __init__(self, problema):
+    def __init__(self, problema):
         self.problema = problema
-        self.nodos_explorados = 0
-        self.tiempo = 0.0
+        self.nodos_explorados = 0  # Cuenta los nodos generados durante la búsqueda.
+        self.tiempo = 0.0  # Guarda el tiempo total que tarda resolver().
+
+    def heuristica(self, nodo):
+        """Nos pasa h(n) que es la heuristica del problema,
+        la distancia de manhattan."""
+        # Estima cuánto falta para llegar a la meta usando distancia Manhattan.
+        fila, col = nodo.estado
+        meta_fila, meta_col = self.problema.meta()
+        return abs(fila - meta_fila) + abs(col - meta_col)   
 
     def _prioridad(self, nodo):
-        g = nodo.costo 
-        h = self.problema.heuristica(nodo)
+        # A* ordena por costo acumulado más estimación restante; fila y columna desempatan.
+        g = nodo.costo  # costo acumulado desde el principio  
+        h = self.problema.heuristica(nodo) #Estimado de la supesta distancia hasta la meta
         f = g + h  #La funcion principal en la que vamos a basar este algoritmo
         fila,  col = nodo.estado 
         return (f, fila, col)
@@ -28,17 +37,19 @@ class aste:
         solucion = None
 
         raiz = self.problema.estado_inicial()
-        abierta = {raiz.estado: raiz} 
-        mejor_g = {raiz.estado: raiz costo}
+        abierta = {raiz.estado: raiz}  #un solo nodo para el estado
+        mejor_g = {raiz.estado: raiz.costo} #El mejor g que se cono por estado
 
         while abierta:
-            nodo min(abierta.values(), key=self._prioridad)
+            # Se elige de la frontera el nodo con menor prioridad A*.
+            nodo = min(abierta.values(), key=self._prioridad)
             del abierta[nodo.estado]
 
             if self.problema.es_meta(nodo):
                 solucion = nodo
                 break
 
+            # Genera estados alcanzables y conserva solo los que mejoran su costo.
             hijos = self.problema.sucesores(nodo)
             self.nodos_explorados += len(hijos)
             for hijo in hijos:
