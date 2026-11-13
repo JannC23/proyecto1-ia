@@ -11,7 +11,7 @@ class costo:
         self.nodos_explorados = 0
         self.tiempo = 0.0
 
-    def _prioridad(self,nodo):
+    def _prioridad(self,nodo):  #Para poder desempatar
         fila, col = nodo.estado 
         return (nodo.costo, fila, col)
 

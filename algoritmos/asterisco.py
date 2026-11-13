@@ -7,10 +7,17 @@ class aste:
     f(n) tiene. Formula que aplica A* f(n) = g(n) + h(n)
 """
 
-     def __init__(self, problema):
+    def __init__(self, problema):
         self.problema = problema
         self.nodos_explorados = 0
         self.tiempo = 0.0
+
+    def heuristica(self, nodo):
+        """Nos pasa h(n) que es la heuristica del problema,
+        la distancia de manhattan"""
+        fila, col = nodo.estado
+        meta_fila, meta_col = self.problema.meta()
+        return abs(fila - meta_fila) + abs(col - meta_col)   
 
     def _prioridad(self, nodo):
         g = nodo.costo 
