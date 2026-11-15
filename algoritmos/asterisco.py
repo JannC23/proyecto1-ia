@@ -21,15 +21,15 @@ class AEstrella:
         """Nos pasa h(n) que es la heuristica del problema,
         la distancia de manhattan."""
         # Estima cuánto falta para llegar a la meta usando distancia Manhattan.
-        pendiente = len(self.problema.clases) - len(nodo.estado)
+        pendiente = len(self.problema.cursos) - len(nodo.estado)
         return pendiente * 1 
 
-  
+
 
     def _prioridad(self, nodo):
         # A* ordena por costo acumulado más estimación restante; fila y columna desempatan.
         g = nodo.costo  # costo acumulado desde el principio  
-        h = self.problema.heuristica(nodo) #Estimado de la supesta distancia hasta la meta
+        h = self.heuristica(nodo) #Estimado de la supesta distancia hasta la meta
         return g + h # f(n) = g(n) + h(n)
 
 
@@ -42,7 +42,7 @@ class AEstrella:
 
         raiz = self.problema.estado_inicial()
         abierta = {self._clave(raiz.estado): raiz}  #un solo nodo para el estado
-        mejor_g = {raiz._clave(raiz.estado): raiz.costo} #El mejor g que se cono por estado
+        mejor_g = {self._clave(raiz.estado): raiz.costo} #El mejor g que se cono por estado
 
         while abierta:
             # Se elige de la frontera el nodo con menor prioridad A*.
