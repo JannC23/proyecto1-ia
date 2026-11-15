@@ -1,4 +1,5 @@
 import time
+import heapq
 
 
 class AEstrella:
@@ -18,20 +19,26 @@ class AEstrella:
         return tuple(sorted(estado.items()))    
 
     def heuristica(self, nodo):
-        """Nos pasa h(n) que es la heuristica del problema,
-        la distancia de manhattan."""
-        # Estima cuánto falta para llegar a la meta usando distancia Manhattan.
-        pendiente = len(self.problema.cursos) - len(nodo.estado)
-        return pendiente * 1 
+        """Esto estima cuando puede faltar para llegar a la meta. 
+         Si alguna clase pentiende ya no tiene Ninguna combinacion valida
+          el nodo no se podria completar, asi que devolver infito podria seguir siendo admisible y permintiendonos asi descartarlo """
+        pendientes = [c for c in self.problema.cursos if c not in nodo.estado]
+        for clase in pendientes:
+            tiene_opcion = False
+            for franja in self.problema.franjas:
+                for salon in self.problema.salones:
+                    if not self.problema.choca(nodo, clase, franja, salon):
+                        tiene_opcion = True
+                        break
+                if tiene_opcion:
+                    break
+            if not tiene_opcion:
+                return float("inf")
+        return len(pendientes)
 
 
 
-    def _prioridad(self, nodo):
-        # A* ordena por costo acumulado más estimación restante; fila y columna desempatan.
-        g = nodo.costo  # costo acumulado desde el principio  
-        h = self.heuristica(nodo) #Estimado de la supesta distancia hasta la meta
-        return g + h # f(n) = g(n) + h(n)
-
+    
 
     def resolver(self):
         """Devuelve el Nodo meta, o None si no hay solución.
@@ -41,13 +48,18 @@ class AEstrella:
         solucion = None
 
         raiz = self.problema.estado_inicial()
-        abierta = {self._clave(raiz.estado): raiz}  #un solo nodo para el estado
-        mejor_g = {self._clave(raiz.estado): raiz.costo} #El mejor g que se cono por estado
+        mejor_g = {self._clave(raiz.estado): raiz.costo}  # Este seria el mejor g encontrado para cada estado.
+        abierta = [] #Frontera es una sola cola de prioridad usando la libreria de heapq
+        orden = 0 #Este seria el contador para desempatar sin comparar nodos
+
+        h_raiz = self.heuristica(raiz)
+        if h_raiz != float("inf"):
+            heapq.heappush(abierta, (raiz.costo + h_raiz, -raiz.profundidad, orden, raiz))
+            orden += 1
 
         while abierta:
             # Se elige de la frontera el nodo con menor prioridad A*.
-            nodo = min(abierta.values(), key=self._prioridad)
-            del abierta[self._clave(nodo.estado)]  # lo sacamos de la frontera
+            nodo = heapq.heappop(abierta)[-1]  # Se obtiene el nodo de la tupla (f(n), -profundidad, orden, nodo)
 
             if self.problema.es_meta(nodo):
                 solucion = nodo
@@ -59,8 +71,11 @@ class AEstrella:
             for hijo in hijos:
                 k = self._clave(hijo.estado)
                 if hijo.costo < mejor_g.get(k, float("inf")):
+                    if self.heurisica(hijo) == float("inf"):
+                        continue  # No hay combinacion valida para este nodo entonces lo ignoramos con el conitnue
                     mejor_g[k] = hijo.costo
-                    abierta[k] = hijo  # reemplazar cuando haya un costo mayor
+                    heapq.heappush(abierta, (hijo.costo + self.heuristica(hijo), -hijo.profundidad, orden, hijo))
+                    orden += 1
 
         self.tiempo = time.perf_counter() - inicio
         return solucion
