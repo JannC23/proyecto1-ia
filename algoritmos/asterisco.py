@@ -1,6 +1,7 @@
 import time
 
 
+
 class AEstrella:
     """Usamos A* Que expande el nodo que la suma de g(n)(costo)
     y de la h(n) heuristica da f(n), expandimos el nodo que menor
@@ -18,11 +19,22 @@ class AEstrella:
         return tuple(sorted(estado.items()))    
 
     def heuristica(self, nodo):
-        """Nos pasa h(n) que es la heuristica del problema,
-        la distancia de manhattan."""
-        # Estima cuánto falta para llegar a la meta usando distancia Manhattan.
-        pendiente = len(self.problema.cursos) - len(nodo.estado)
-        return pendiente * 1 
+        """Esto nos ayuda a saber cuanto falta para llegar a la meta.
+        si no tneemos combinacion valida el nodo no se completaria asi que infito podria ser admisible"""
+      
+        pendientes = [c for c in self.problema.cursos if c not in nodo.estado]
+        for clase in pendientes:
+            tiene_opcion = False
+            for franja in self.problema.franjas:
+                for salon in self.problema.salones:
+                    if not self.problema.choca(nodo, clase, franja, salon):
+                        tiene_opcion = True
+                        break
+                if tiene_opcion:
+                    break
+            if not tiene_opcion:
+                return float("inf")
+        return len(pendientes)
 
 
 
@@ -30,7 +42,7 @@ class AEstrella:
         # A* ordena por costo acumulado más estimación restante; fila y columna desempatan.
         g = nodo.costo  # costo acumulado desde el principio  
         h = self.heuristica(nodo) #Estimado de la supesta distancia hasta la meta
-        return g + h # f(n) = g(n) + h(n)
+        return (g + h, -nodo.profundidad)  # desempata por profundidad 
 
 
     def resolver(self):
@@ -41,13 +53,18 @@ class AEstrella:
         solucion = None
 
         raiz = self.problema.estado_inicial()
-        abierta = {self._clave(raiz.estado): raiz}  #un solo nodo para el estado
         mejor_g = {self._clave(raiz.estado): raiz.costo} #El mejor g que se cono por estado
+        abierta = {}
+        p_raiz = self._prioridad(raiz)
+        if p_raiz[0] !=float("inf"):        #La priorirda se calcularioa una vez solo si insertamos
+            abierta[self._clave(raiz.estado)] = (p_raiz, raiz)       
+        
 
         while abierta:
             # Se elige de la frontera el nodo con menor prioridad A*.
-            nodo = min(abierta.values(), key=self._prioridad)
-            del abierta[self._clave(nodo.estado)]  # lo sacamos de la frontera
+            k_min = min(abierta, key=lambda k: abierta[k][0])
+            nodo = abierta.pop(k_min)[1]  # Se saca de la frontera
+
 
             if self.problema.es_meta(nodo):
                 solucion = nodo
@@ -58,9 +75,13 @@ class AEstrella:
             self.nodos_explorados += len(hijos)
             for hijo in hijos:
                 k = self._clave(hijo.estado)
+
                 if hijo.costo < mejor_g.get(k, float("inf")):
+                    p = self._prioridad(hijo)
+                    if p[0] == float("inf"):  # No se llega a la meta en este nodo, no se agrega a la frontera.
+                        continue # no hay salida, entonces lo ignoramos
                     mejor_g[k] = hijo.costo
-                    abierta[k] = hijo  # reemplazar cuando haya un costo mayor
+                    abierta[k] = (p, hijo)  # reemplazar cuando haya un costo mayor
 
         self.tiempo = time.perf_counter() - inicio
         return solucion
