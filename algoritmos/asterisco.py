@@ -1,6 +1,7 @@
 import time
 
 
+
 class AEstrella:
     """Usamos A* Que expande el nodo que la suma de g(n)(costo)
     y de la h(n) heuristica da f(n), expandimos el nodo que menor
