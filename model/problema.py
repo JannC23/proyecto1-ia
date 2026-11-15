@@ -16,15 +16,33 @@ class Problema:
     """Devuelve True si asignar 'clase' a (franja, salon) choca con alguna
     asignación ya hecha en nodo.estado (mismo día y franja, y mismo salón,
     profesor o grupo)."""
+    # Verifica que no haya otra materia en el mismo dia y hora
     def choca(self, nodo, clase, franja, salon):
         profesor, grupo = self.cursos[clase]
+
         for clase_asignada, (dia_asignado, franja_asignada, salon_asignado) in nodo.estado.items():
+
+            # Solo revisamos las clases del mismo dia y hora
             if (dia_asignado, franja_asignada) != franja:
                 continue
+
             profesor_asignado, grupo_asignado = self.cursos[clase_asignada]
-            if (salon_asignado == salon or profesor_asignado == profesor
-                    or grupo_asignado == grupo):
+
+            # Un salon no puede tener dos clases a la vez
+            if salon_asignado == salon:
                 return True
+
+            # Un profesor no puede dictar dos clases a la vez
+            if profesor_asignado == profesor:
+                return True
+
+            # Un grupo no puede tener dos clases a la vez
+            if grupo_asignado == grupo:
+                return True
+
+            # No permitir dos materias en el mismo dia y hora
+            return True
+
         return False
 
     """Devuelve la lista de nodos hijos válidos de 'nodo'."""

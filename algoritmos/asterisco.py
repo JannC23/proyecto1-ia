@@ -36,7 +36,7 @@ class AEstrella:
                 return float("inf")
         return len(pendientes)
 
-  
+
 
     
 
