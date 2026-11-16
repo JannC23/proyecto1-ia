@@ -20,6 +20,10 @@ class Problema:
     def choca(self, nodo, clase, franja, salon):
         profesor, grupo = self.cursos[clase]
 
+        # Restriccion blanda: el profesor no dicta en franjas no disponibles
+        if franja in self.profesores.get(profesor, []):
+            return True
+
         for clase_asignada, (dia_asignado, franja_asignada, salon_asignado) in nodo.estado.items():
 
             # Solo revisamos las clases del mismo dia y hora
@@ -39,9 +43,6 @@ class Problema:
             # Un grupo no puede tener dos clases a la vez
             if grupo_asignado == grupo:
                 return True
-
-            # No permitir dos materias en el mismo dia y hora
-            return True
 
         return False
 
